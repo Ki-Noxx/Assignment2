@@ -1,80 +1,108 @@
+# Question 1: Custom Text Encryption and Decryption
+# This program encrypts text based on specific rules,
+# decrypts it, and verifies correctness.
 
-# Question 1: Text Encryption and Decryption
+def encrypt_char(char, shift1, shift2):
+    """Encrypt a single character based on given rules"""
 
-# Shift value for Caesar Cipher
-SHIFT = 3
+    # Lowercase letters
+    if char.islower():
+        if 'a' <= char <= 'm':
+            shift = shift1 * shift2
+            return chr((ord(char) - 97 + shift) % 26 + 97)
+        elif 'n' <= char <= 'z':
+            shift = shift1 + shift2
+            return chr((ord(char) - 97 - shift) % 26 + 97)
+
+    # Uppercase letters
+    elif char.isupper():
+        if 'A' <= char <= 'M':
+            return chr((ord(char) - 65 - shift1) % 26 + 65)
+        elif 'N' <= char <= 'Z':
+            shift = shift2 ** 2
+            return chr((ord(char) - 65 + shift) % 26 + 65)
+
+    # Other characters remain unchanged
+    return char
 
 
-def encrypt_text(text):
-    """
-    This function encrypts the given text by shifting
-    each alphabetical character forward by SHIFT.
-    Uppercase and lowercase letters are handled separately.
-    Non-alphabet characters are left unchanged.
-    """
+def decrypt_char(char, shift1, shift2):
+    """Decrypt a single character by reversing encryption rules"""
+
+    # Lowercase letters
+    if char.islower():
+        if 'a' <= char <= 'm':
+            shift = shift1 * shift2
+            return chr((ord(char) - 97 - shift) % 26 + 97)
+        elif 'n' <= char <= 'z':
+            shift = shift1 + shift2
+            return chr((ord(char) - 97 + shift) % 26 + 97)
+
+    # Uppercase letters
+    elif char.isupper():
+        if 'A' <= char <= 'M':
+            return chr((ord(char) - 65 + shift1) % 26 + 65)
+        elif 'N' <= char <= 'Z':
+            shift = shift2 ** 2
+            return chr((ord(char) - 65 - shift) % 26 + 65)
+
+    return char
+
+
+def encrypt_file(shift1, shift2):
+    """Reads raw_text.txt and writes encrypted_text.txt"""
+
+    with open("raw_text.txt", "r", encoding="utf-8") as infile:
+        text = infile.read()
+
     encrypted = ""
-
-    # Loop through each character in the text
     for char in text:
-        # Check if the character is an uppercase letter
-        if char.isupper():
-            # Convert character to ASCII, apply shift, then convert back
-            encrypted += chr((ord(char) - 65 + SHIFT) % 26 + 65)
+        encrypted += encrypt_char(char, shift1, shift2)
 
-        # Check if the character is a lowercase letter
-        elif char.islower():
-            encrypted += chr((ord(char) - 97 + SHIFT) % 26 + 97)
-
-        # If character is not a letter, keep it the same
-        else:
-            encrypted += char
-
-    return encrypted
+    with open("encrypted_text.txt", "w", encoding="utf-8") as outfile:
+        outfile.write(encrypted)
 
 
-def decrypt_text(text):
-    """
-    This function decrypts the encrypted text by shifting
-    each alphabetical character backward by SHIFT.
-    This reverses the encryption process.
-    """
+def decrypt_file(shift1, shift2):
+    """Reads encrypted_text.txt and writes decrypted_text.txt"""
+
+    with open("encrypted_text.txt", "r", encoding="utf-8") as infile:
+        text = infile.read()
+
     decrypted = ""
-
-    # Loop through each character in the encrypted text
     for char in text:
-        # Decrypt uppercase letters
-        if char.isupper():
-            decrypted += chr((ord(char) - 65 - SHIFT) % 26 + 65)
+        decrypted += decrypt_char(char, shift1, shift2)
 
-        # Decrypt lowercase letters
-        elif char.islower():
-            decrypted += chr((ord(char) - 97 - SHIFT) % 26 + 97)
+    with open("decrypted_text.txt", "w", encoding="utf-8") as outfile:
+        outfile.write(decrypted)
 
-        # Keep non-alphabet characters unchanged
-        else:
-            decrypted += char
 
-    return decrypted
+def verify_decryption():
+    """Compares raw_text.txt and decrypted_text.txt"""
+
+    with open("raw_text.txt", "r", encoding="utf-8") as f1:
+        original = f1.read()
+
+    with open("decrypted_text.txt", "r", encoding="utf-8") as f2:
+        decrypted = f2.read()
+
+    if original == decrypted:
+        print("Decryption successful. Files match.")
+    else:
+        print("Decryption failed. Files do not match.")
 
 
 # ---------------- MAIN PROGRAM ----------------
 
-# Step 1: Open and read the original text file
-with open("raw_text.txt", "r", encoding="utf-8") as file:
-    raw_text = file.read()
+# Step 1: Get user inputs
+shift1 = int(input("Enter shift1 value: "))
+shift2 = int(input("Enter shift2 value: "))
 
-# Step 2: Encrypt the original text
-encrypted_text = encrypt_text(raw_text)
+# Step 2: Encrypt file
+encrypt_file(shift1, shift2)
 
-# Step 3: Save the encrypted text into a new file
-with open("encrypted_text.txt", "w", encoding="utf-8") as file:
-    file.write(encrypted_text)
+# Step 3: Decrypt file
+decrypt_file(shift1, shift2)
 
-# Step 4: Decrypt the encrypted text back to original
-decrypted_text = decrypt_text(encrypted_text)
-
-# Step 5: Verify that decrypted text matches original text
-if decrypted_text == raw_text:
-    print("Decryption successful. Text matches original.")
-else:
-    print("Decryption failed. Text does not match original.")
+# Step 4: Verify correctness
+verify_decryption()
